@@ -153,7 +153,7 @@ class JellyfinBijoy : Source(), UnmeteredSource {
     override val supportsLatest = true
     override val id: Long = 73658291047123456L
 
-    private val json = Json { isLenient = true; ignoreUnknownKeys = true; namingStrategy = PascalCaseToCamelCase }
+    override val json = Json { isLenient = true; ignoreUnknownKeys = true; namingStrategy = PascalCaseToCamelCase }
     private val deviceInfo by lazy { getDeviceInfo(Injekt.get<Application>()) }
 
     private var accessToken: String by preferences.delegate("access_token", "")
@@ -199,9 +199,10 @@ class JellyfinBijoy : Source(), UnmeteredSource {
                 when (filter) {
                     is CategoryFilter -> if (filter.toValue().isNotBlank()) setQueryParameter("ParentId", filter.toValue())
                     is SortFilter -> {
-                        setQueryParameter("SortBy", filter.toValue())
+                        setQueryParameter("SortBy", filter.toSortValue())
                         setQueryParameter("SortOrder", if (filter.isAscending()) "Ascending" else "Descending")
                     }
+                    else -> {}
                 }
             }
         }.build()
@@ -264,8 +265,8 @@ class JellyfinBijoy : Source(), UnmeteredSource {
         fun toValue() = ids[state]
     }
     private class SortFilter : AnimeFilter.Sort("Sort by", arrayOf("Name", "Date Added", "Premiere Date"), Selection(0, false)) {
-        private val values = arrayOf("SortName", "DateCreated", "ProductionYear")
-        fun toValue() = values[state!!.index]
+        private val sortables = arrayOf("SortName", "DateCreated", "ProductionYear")
+        fun toSortValue() = sortables[state!!.index]
         fun isAscending() = state!!.ascending
     }
 
